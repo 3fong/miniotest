@@ -20,8 +20,11 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
@@ -34,18 +37,42 @@ import io.minio.errors.MinioException;
 
 @Path("/photoservice")
 public class PhotoService {
-    // Initialize new album service.
-    AlbumDao albumDao = new AlbumDao();
+	// Initialize new album service.
+	AlbumDao albumDao = new AlbumDao();
 
-    // Define GET method and resource.
-    @GET
-    @Path("/list")
+	// Define GET method and resource.
+	@GET
+	@Path("/list")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public List<Album> listAlbums()
+			throws InvalidKeyException, NoSuchAlgorithmException, IOException, XmlPullParserException, MinioException {
+
+		// Return list of albums.
+		return albumDao.listAlbums();
+	}
+
+	@GET
+	@Path("/get")
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Album getPhoto(String name)
+			throws InvalidKeyException, NoSuchAlgorithmException, IOException, XmlPullParserException, MinioException {
+		return albumDao.getPhoto(name);
+	}
+
+	@POST
+    @Path("/insert")
     @Produces({MediaType.APPLICATION_JSON})
-    public List<Album> listAlbums() throws InvalidKeyException,
+    public Map<String,String> insertBucket(@FormParam(value = "bucketName") String bucketName) throws InvalidKeyException,
             NoSuchAlgorithmException, IOException,
             XmlPullParserException, MinioException {
 
-        // Return list of albums.
-        return albumDao.listAlbums();
+        return albumDao.insertBucket(bucketName);
     }
+
+	@POST 
+	@Path("/upload")
+	public Map<String, String> uploadFile(@FormParam(value = "bucketName") String bucketName,@FormParam(value = "objectName") String objectName,@FormParam(value = "fileName") String fileName)
+			throws InvalidKeyException, NoSuchAlgorithmException, IOException, XmlPullParserException, MinioException {
+		return albumDao.uploadFile(bucketName, objectName, fileName);
+	}
 }

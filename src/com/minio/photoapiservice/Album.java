@@ -24,7 +24,18 @@ public class Album {
     private String url;
     private String description;
 
-    public String getUrl() {
+    public Album() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	public Album(String url, String description) {
+		super();
+		this.url = url;
+		this.description = description;
+	}
+
+	public String getUrl() {
         return url;
     }
 
