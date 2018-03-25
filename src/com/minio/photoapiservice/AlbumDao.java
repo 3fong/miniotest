@@ -39,89 +39,93 @@ import io.minio.errors.InternalException;
 import io.minio.errors.InvalidArgumentException;
 import io.minio.errors.InvalidBucketNameException;
 import io.minio.errors.InvalidEndpointException;
+import io.minio.errors.InvalidExpiresRangeException;
 import io.minio.errors.InvalidPortException;
 import io.minio.errors.MinioException;
 import io.minio.errors.NoResponseException;
 import io.minio.errors.RegionConflictException;
 
 public class AlbumDao {
-    private static final String ALBUMS = "albums";
+	private static final String ALBUMS = "liu";
+	private static final String IP = "http://localhost";
 
-	public List<Album> listAlbums() throws NoSuchAlgorithmException,
-            IOException, InvalidKeyException, XmlPullParserException, MinioException {
+	private static final String ACCESSKEY = "B7XIE72VDKNSINN898D3";
+	private static final String SECRETKEY = "gCCpGe2DH7rk7i8j9kKxR6hKwnFwKzC4WXD5LFoF";
 
-        List<Album> list = new ArrayList<Album>();
-        final String minioBucket = ALBUMS;
+	public List<Album> listAlbums(String minioBucket)
+			throws NoSuchAlgorithmException, IOException, InvalidKeyException, XmlPullParserException, MinioException {
 
-        // Initialize minio client object.
-        MinioClient minioClient = new MinioClient("http://192.168.0.94", 9000,
-                                                  "J2RMOVEHPOZXB38T0NHN",
-                                                  "JNSAmK78qsX8Fiy2OZbSM1/k+R4LimUC9MLM8uyY");
+		List<Album> list = new ArrayList<Album>();
+		// Initialize minio client object.
+		MinioClient minioClient = new MinioClient(IP, 9000, ACCESSKEY, SECRETKEY);
 
-        // List all objects.
-        Iterable<Result<Item>> myObjects = minioClient.listObjects(minioBucket);
+		// List all objects.
+		Iterable<Result<Item>> myObjects = minioClient.listObjects(minioBucket);
 
-        // Iterate over each elements and set album url.
-        for (Result<Item> result : myObjects) {
-            Item item = result.get();
-            System.out.println(item.lastModified() + ", " + item.size() + ", " + item.objectName());
+		// Iterate over each elements and set album url.
+		for (Result<Item> result : myObjects) {
+			Item item = result.get();
+			System.out.println(item.lastModified() + ", " + item.size() + ", " + item.objectName());
 
-            // Generate a presigned URL which expires in a day
-            String url = minioClient.presignedGetObject(minioBucket, item.objectName(), 60 * 60 * 24);
-             
-            // Create a new Album Object
-            Album album = new Album();
-            
-            // Set the presigned URL in the album object
-            album.setUrl(url);
-            
-            // Add the album object to the list holding Album objects
-            list.add(album);
-            
-        }
+			// Generate a presigned URL which expires in a day
+			String url = minioClient.presignedGetObject(minioBucket, item.objectName(), 60 * 60 * 24);
 
-        // Return list of albums.
-        return list;
-    }
+			// Create a new Album Object
+			Album album = new Album();
 
-	public Album getPhoto(String name) throws InvalidEndpointException, InvalidPortException, InvalidKeyException, InvalidBucketNameException, NoSuchAlgorithmException, InsufficientDataException, NoResponseException, ErrorResponseException, InternalException, IOException, XmlPullParserException {
-        MinioClient minioClient = new MinioClient("http://192.168.0.94", 9000,
-                "J2RMOVEHPOZXB38T0NHN",
-                "JNSAmK78qsX8Fiy2OZbSM1/k+R4LimUC9MLM8uyY");
-        String objectUrl = minioClient.getObjectUrl(ALBUMS, "a.jpg");
-//        minioClient.
-        System.out.println(objectUrl);
-		return new Album(objectUrl,null);
+			// Set the presigned URL in the album object
+			album.setUrl(url);
+
+			// Add the album object to the list holding Album objects
+			list.add(album);
+
+		}
+
+		// Return list of albums.
+		return list;
+	}
+
+	public Album getPhoto(String name) throws InvalidEndpointException, InvalidPortException, InvalidKeyException,
+			InvalidBucketNameException, NoSuchAlgorithmException, InsufficientDataException, NoResponseException,
+			ErrorResponseException, InternalException, IOException, XmlPullParserException, InvalidExpiresRangeException {
+		MinioClient minioClient = new MinioClient(IP, 9000, ACCESSKEY, SECRETKEY);
+//		String objectUrl = minioClient.getObjectUrl(ALBUMS, "a.jpg");
+		String presignedGetObject = minioClient.presignedGetObject(ALBUMS, name);
+		// minioClient.
+		System.out.println(presignedGetObject);
+		return new Album(presignedGetObject, null);
 	}
 
 	/**
 	 * @Description: 添加bucket
 	 * @return
-	 * @throws InvalidPortException 
-	 * @throws InvalidEndpointException 
-	 * @throws XmlPullParserException 
-	 * @throws IOException 
-	 * @throws InternalException 
-	 * @throws ErrorResponseException 
-	 * @throws NoResponseException 
-	 * @throws InsufficientDataException 
-	 * @throws NoSuchAlgorithmException 
-	 * @throws RegionConflictException 
-	 * @throws InvalidBucketNameException 
-	 * @throws InvalidKeyException 
+	 * @throws InvalidPortException
+	 * @throws InvalidEndpointException
+	 * @throws XmlPullParserException
+	 * @throws IOException
+	 * @throws InternalException
+	 * @throws ErrorResponseException
+	 * @throws NoResponseException
+	 * @throws InsufficientDataException
+	 * @throws NoSuchAlgorithmException
+	 * @throws RegionConflictException
+	 * @throws InvalidBucketNameException
+	 * @throws InvalidKeyException
 	 */
-	public Map<String, String> insertBucket(String bucketName) throws InvalidEndpointException, InvalidPortException, InvalidKeyException, InvalidBucketNameException, RegionConflictException, NoSuchAlgorithmException, InsufficientDataException, NoResponseException, ErrorResponseException, InternalException, IOException, XmlPullParserException {
-		MinioClient minioClient = new MinioClient("http://192.168.0.94", 9000,
-                "J2RMOVEHPOZXB38T0NHN",
-                "JNSAmK78qsX8Fiy2OZbSM1/k+R4LimUC9MLM8uyY");
+	public Map<String, String> insertBucket(String bucketName)
+			throws InvalidEndpointException, InvalidPortException, InvalidKeyException, InvalidBucketNameException,
+			RegionConflictException, NoSuchAlgorithmException, InsufficientDataException, NoResponseException,
+			ErrorResponseException, InternalException, IOException, XmlPullParserException {
+		MinioClient minioClient = new MinioClient(IP, 9000, ACCESSKEY, SECRETKEY);
 		minioClient.makeBucket(bucketName);
 		return null;
 	}
-	
-	public Map<String, String> uploadFile(String bucketName,String objectName,String file) throws InvalidEndpointException, InvalidPortException, InvalidKeyException, InvalidBucketNameException, RegionConflictException, NoSuchAlgorithmException, InsufficientDataException, NoResponseException, ErrorResponseException, InternalException, IOException, XmlPullParserException, InvalidArgumentException {
-		MinioClient minioClient = new MinioClient("http://192.168.0.94", 9000,
-                "J2RMOVEHPOZXB38T0NHN",
-                "JNSAmK78qsX8Fiy2OZbSM1/k+R4LimUC9MLM8uyY");
+
+	public Map<String, String> uploadFile(String bucketName, String objectName, String file)
+			throws InvalidEndpointException, InvalidPortException, InvalidKeyException, InvalidBucketNameException,
+			RegionConflictException, NoSuchAlgorithmException, InsufficientDataException, NoResponseException,
+			ErrorResponseException, InternalException, IOException, XmlPullParserException, InvalidArgumentException {
+		MinioClient minioClient = new MinioClient(IP, 9000, ACCESSKEY, SECRETKEY);
 		minioClient.putObject(bucketName, objectName, file);
 		return null;
 	}
